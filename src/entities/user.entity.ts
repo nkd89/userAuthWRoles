@@ -4,37 +4,49 @@ import {
   PrimaryGeneratedColumn,
   BeforeInsert,
   BeforeUpdate,
+  ManyToOne,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Role } from './role.entity';
 
+@ObjectType()
 @Entity('users')
 export class User {
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Field(()=> String, { nullable: true })
+  @Column({ nullable: false })
   first_name: string;
 
-  @Column()
+  @Field(()=> String, { nullable: true })
+  @Column({ nullable: false })
   last_name: string;
 
+  @Field(()=> String, { nullable: true })
   @Column({ unique: true, nullable: true })
   phone: string;
 
+  @Field(()=> String, { nullable: true })
   @Column({ unique: true, nullable: true })
   email: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   phone_verified_at: Date | null;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   email_verified_at: Date | null;
 
   @Column()
   password_hash: string;
 
-  @Column({ nullable: true, default: 'user' })
-  role: string;
+  @Field(() => Role, { nullable: true })
+  @ManyToOne(() => Role, { eager: true, nullable: true })
+  role: Role;
 
   @BeforeInsert()
   @BeforeUpdate()
