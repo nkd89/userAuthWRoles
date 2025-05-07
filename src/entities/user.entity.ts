@@ -46,7 +46,7 @@ export class User {
 
   @Field(() => Role, { nullable: true })
   @ManyToOne(() => Role, { eager: true, nullable: true })
-  role: Role;
+  role: Role | null;
 
   @BeforeInsert()
   @BeforeUpdate()

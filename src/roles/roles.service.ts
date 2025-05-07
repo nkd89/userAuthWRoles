@@ -11,7 +11,7 @@ export class RolesService {
     @InjectRepository(Permission) private permissionRepo: Repository<Permission>
   ) {}
 
-  async create(role: Role): Promise<Role> {
+  async create(role: Partial<Role>): Promise<Role> {
     const existingRole = await this.roleRepo.findOne({ where: { name: role.name } });
     if (existingRole) {
       throw new NotFoundException(`Role with name ${role.name} already exists`);

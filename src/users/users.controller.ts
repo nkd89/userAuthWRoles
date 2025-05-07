@@ -66,6 +66,7 @@ export class UsersController {
   findAllUsers() {
     return this.usersService.findAll();
   }
+
   @ApiOperation({ summary: 'Update the role of a user (requires permission)' })
   @ApiResponse({ status: 200, description: 'The updated user with new role', type: User })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -74,8 +75,9 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   // TODO: Расскоментировать с нужной ролью
   // @PermissionsAll('user:permission:write')
-  @Put(':id/role')
-  updateRole(@Request() req, @Body('role') role: string, @Param('id') id: string): Promise<User | null> {
-    return this.usersService.updateRole(id, role);
+  @Put('me/role')
+  assignRole(@Request() req, @Body('role') role: number): Promise<User | null> {
+    const userId = req.user.id;
+    return this.usersService.assignRole( role, userId);
   }
 }

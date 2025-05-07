@@ -86,18 +86,4 @@ export class UsersService {
     return this.userRepo.save(user);
   }
   
-  async updateRole(userId: string, roleName: string): Promise<User | null> {
-    const user = await this.findById(Number(userId));
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    const role = await this.roleRepo.findOne({ where: { name: roleName } });
-    if (!role) {
-      throw new BadRequestException('Role not found');
-    }
-
-    user.role = role;
-    return this.userRepo.save(user);
-  }
 }
