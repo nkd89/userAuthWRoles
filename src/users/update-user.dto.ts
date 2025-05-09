@@ -16,6 +16,12 @@ export class UpdateUserDto {
   @IsString()
   last_name?: string;
 
+  @ApiProperty({ description: 'Avatar URL of the user', required: false })
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
   @ApiProperty({ description: 'Email address of the user', required: false })
   @Field(() => String, { nullable: true })
   @IsOptional()

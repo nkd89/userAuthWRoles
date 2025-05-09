@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from './create-user.dto';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PermissionGuard } from 'src/permissions/permissions.guard';
 import { PermissionsAll, PermissionsAny } from 'src/permissions/permissions.decorator';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -79,5 +80,19 @@ export class UsersController {
   assignRole(@Request() req, @Body('role') role: number): Promise<User | null> {
     const userId = req.user.id;
     return this.usersService.assignRole( role, userId);
+  }
+
+  @ApiOperation({ summary: 'Upload an avatar for the currently authenticated user' })
+  @ApiResponse({ status: 200, description: 'The updated user with new avatar', type: User })
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Post('me/avatar')
+  async uploadAvatar(
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File
+  ): Promise<User | null> {
+    const userId = req.user.id;
+    const avatarUrl = await this.usersService.uploadAvatarToS3(file);
+    return this.usersService.uploadAvatar(userId, avatarUrl);
   }
 }

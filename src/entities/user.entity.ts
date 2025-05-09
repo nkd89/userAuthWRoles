@@ -26,6 +26,10 @@ export class User {
   last_name: string;
 
   @Field(()=> String, { nullable: true })
+  @Column({ nullable: true })
+  avatar: string;
+
+  @Field(()=> String, { nullable: true })
   @Column({ unique: true, nullable: true })
   phone: string;
 

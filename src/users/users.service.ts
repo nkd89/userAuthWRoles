@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
 import { Role } from 'src/entities/role.entity';
 import { CreateUserDto } from './create-user.dto';
+import * as FormData from 'form-data';
+import axios from 'axios';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +16,12 @@ export class UsersService {
   ) {}
 
   async createUser(userDto: CreateUserDto): Promise<User> {
+    Object.keys(userDto).forEach((key) => {
+      if (userDto[key] === undefined || userDto[key] === null || userDto[key] === '') {
+      delete userDto[key];
+      }
+    });
+
     if (!userDto.first_name || !userDto.last_name) {
       throw new BadRequestException('First name and last name are required');
     }
@@ -63,7 +71,13 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: Partial<User>): Promise<User | null> {
-    await this.userRepo.update(id, updateUserDto);
+    const user = await this.findById(id);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+  
+    await this.userRepo.save({...user, ...updateUserDto });
+  
     return this.findById(id);
   }
 
@@ -84,6 +98,55 @@ export class UsersService {
 
     user.role = role;
     return this.userRepo.save(user);
+  }
+
+  async uploadAvatar(userId: number, imgUrl: string): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!imgUrl) {
+      throw new BadRequestException('Image URL is required');
+    }
+
+    user.avatar = imgUrl;
+    return this.userRepo.save(user);
+  }
+
+  async uploadAvatarToS3(file: Express.Multer.File): Promise<string> {
+    const S3_URL = process.env.S3_URL;
+    const TOKEN = process.env.S3_UPLOAD_TOKEN;
+  
+    if (!S3_URL || !TOKEN) {
+      throw new BadRequestException('S3_URL or token not set');
+    }
+  
+    if (!file || !file.buffer) {
+      throw new BadRequestException('Файл не получен');
+    }
+  
+    const form = new FormData();
+    form.append('file', file.buffer, {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+  
+    try {
+      const response = await axios.post(S3_URL, form, {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          ...form.getHeaders(),
+        },
+        responseType: 'text',
+      });
+  
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data || error.message;
+      console.error('S3 upload failed:', message);
+      throw new BadRequestException('Upload failed: ' + message);
+    }
   }
   
 }
