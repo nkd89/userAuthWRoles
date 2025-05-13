@@ -12,7 +12,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 @Module({
   imports: [
-     ConfigModule.forRoot({
+    ConfigModule.forRoot({
       isGlobal: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -37,7 +37,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
     UsersModule,
     AuthModule,
     PermissionsModule,
-    RolesModule
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

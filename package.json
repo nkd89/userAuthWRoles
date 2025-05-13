@@ -18,6 +18,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky",
     "lint": "eslint --ext .ts src",
+    "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --check .",
     "format:write": "prettier --write ."
   },
