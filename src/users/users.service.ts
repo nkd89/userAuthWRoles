@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { User } from 'src/entities/user.entity';
 import { Role } from 'src/entities/role.entity';
 import { CreateUserDto } from './create-user.dto';
@@ -18,7 +17,7 @@ export class UsersService {
   async createUser(userDto: CreateUserDto): Promise<User> {
     Object.keys(userDto).forEach((key) => {
       if (userDto[key] === undefined || userDto[key] === null || userDto[key] === '') {
-      delete userDto[key];
+        delete userDto[key];
       }
     });
 
@@ -75,9 +74,9 @@ export class UsersService {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-  
-    await this.userRepo.save({...user, ...updateUserDto });
-  
+
+    await this.userRepo.save({ ...user, ...updateUserDto });
+
     return this.findById(id);
   }
 
@@ -117,21 +116,21 @@ export class UsersService {
   async uploadAvatarToS3(file: Express.Multer.File): Promise<string> {
     const S3_URL = process.env.S3_URL;
     const TOKEN = process.env.S3_UPLOAD_TOKEN;
-  
+
     if (!S3_URL || !TOKEN) {
       throw new BadRequestException('S3_URL or token not set');
     }
-  
+
     if (!file || !file.buffer) {
       throw new BadRequestException('Файл не получен');
     }
-  
+
     const form = new FormData();
     form.append('file', file.buffer, {
       filename: file.originalname,
       contentType: file.mimetype,
     });
-  
+
     try {
       const response = await axios.post(S3_URL, form, {
         headers: {
@@ -140,7 +139,7 @@ export class UsersService {
         },
         responseType: 'text',
       });
-  
+
       return response.data;
     } catch (error) {
       const message = error.response?.data || error.message;
@@ -148,5 +147,4 @@ export class UsersService {
       throw new BadRequestException('Upload failed: ' + message);
     }
   }
-  
 }

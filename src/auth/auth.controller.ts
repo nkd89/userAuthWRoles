@@ -10,5 +10,4 @@ export class AuthController {
     const user = await this.authService.validateUser(body.login, body.password);
     return this.authService.login(user);
   }
-
 }
