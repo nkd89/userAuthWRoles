@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Role } from "src/entities/role.entity";
-import { Permission } from "src/entities/permission.entity";
-import { Repository } from "typeorm";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/entities/role.entity';
+import { Permission } from 'src/entities/permission.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role) private roleRepo: Repository<Role>,
-    @InjectRepository(Permission) private permissionRepo: Repository<Permission>
+    @InjectRepository(Permission) private permissionRepo: Repository<Permission>,
   ) {}
 
   async create(role: Partial<Role>): Promise<Role> {
@@ -20,11 +20,11 @@ export class RolesService {
   }
 
   async findAll(): Promise<Role[]> {
-    return this.roleRepo.find({ relations: ["permissions"] });
+    return this.roleRepo.find({ relations: ['permissions'] });
   }
 
   async findOne(id: number): Promise<Role> {
-    const role = await this.roleRepo.findOne({ where: { id }, relations: ["permissions"] });
+    const role = await this.roleRepo.findOne({ where: { id }, relations: ['permissions'] });
     if (!role) {
       throw new NotFoundException(`Role with id ${id} not found`);
     }
@@ -60,7 +60,7 @@ export class RolesService {
     }
 
     const permissions = await Promise.all(
-      permissionNames.map((name) => this.ensurePermissionExists(name))
+      permissionNames.map((name) => this.ensurePermissionExists(name)),
     );
 
     role.permissions = [...(role.permissions || []), ...permissions];
@@ -75,7 +75,7 @@ export class RolesService {
 
     if (permissionNames && permissionNames.length > 0) {
       role.permissions = role.permissions.filter(
-        (permission) => !permissionNames.includes(permission.name)
+        (permission) => !permissionNames.includes(permission.name),
       );
     } else {
       role.permissions = [];

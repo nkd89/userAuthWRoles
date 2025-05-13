@@ -49,5 +49,4 @@ export class UsersResolver {
     const userId = req.user.id;
     return this.usersService.assignRole(userId, roleId);
   }
-
 }

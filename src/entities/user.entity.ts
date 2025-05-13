@@ -17,23 +17,23 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field(()=> String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: false })
   first_name: string;
 
-  @Field(()=> String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: false })
   last_name: string;
 
-  @Field(()=> String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   avatar: string;
 
-  @Field(()=> String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ unique: true, nullable: true })
   phone: string;
 
-  @Field(()=> String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ unique: true, nullable: true })
   email: string;
 

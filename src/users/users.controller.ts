@@ -1,12 +1,30 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  Request,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PermissionGuard } from 'src/permissions/permissions.guard';
-import { PermissionsAll, PermissionsAny } from 'src/permissions/permissions.decorator';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { PermissionsAny } from 'src/permissions/permissions.decorator';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
@@ -72,14 +90,16 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'The updated user with new role', type: User })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiBody({ schema: { type: 'object', properties: { role: { type: 'string', example: 'admin' } } } })
+  @ApiBody({
+    schema: { type: 'object', properties: { role: { type: 'string', example: 'admin' } } },
+  })
   @UseGuards(JwtAuthGuard, PermissionGuard)
   // TODO: Расскоментировать с нужной ролью
   // @PermissionsAll('user:permission:write')
   @Put('me/role')
   assignRole(@Request() req, @Body('role') role: number): Promise<User | null> {
     const userId = req.user.id;
-    return this.usersService.assignRole( role, userId);
+    return this.usersService.assignRole(role, userId);
   }
 
   @ApiOperation({ summary: 'Upload an avatar for the currently authenticated user' })
@@ -89,7 +109,7 @@ export class UsersController {
   @Post('me/avatar')
   async uploadAvatar(
     @Request() req,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<User | null> {
     const userId = req.user.id;
     const avatarUrl = await this.usersService.uploadAvatarToS3(file);

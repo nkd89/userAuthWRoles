@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from "@nestjs/common";
-import { RolesService } from "./roles.service";
-import { Role } from "src/entities/role.entity";
+import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { RolesService } from './roles.service';
+import { Role } from 'src/entities/role.entity';
 
 import { ApiTags, ApiOperation, ApiBody, ApiParam } from '@nestjs/swagger';
 
@@ -50,18 +50,22 @@ export class RolesController {
   @Post(':id/permissions')
   async assignPermissionsToRole(
     @Param('id') roleId: number,
-    @Body() permissionNames: string[]
+    @Body() permissionNames: string[],
   ): Promise<Role> {
     return this.rolesService.assignPermissionsToRole(roleId, permissionNames);
   }
 
   @ApiOperation({ summary: 'Remove permissions from a role' })
   @ApiParam({ name: 'id', description: 'Role ID', type: Number })
-  @ApiBody({ description: 'Optional list of permission names to remove', type: [String], required: false })
+  @ApiBody({
+    description: 'Optional list of permission names to remove',
+    type: [String],
+    required: false,
+  })
   @Delete(':id/permissions')
   async removePermissionsFromRole(
     @Param('id') roleId: number,
-    @Body() permissionNames?: string[]
+    @Body() permissionNames?: string[],
   ): Promise<Role> {
     return this.rolesService.removePermissionsFromRole(roleId, permissionNames);
   }
