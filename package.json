@@ -19,8 +19,8 @@
     "prepare": "husky",
     "lint": "eslint --ext .ts src",
     "lint:fix": "eslint . --ext .ts --fix",
-    "format": "prettier --check .",
-    "format:write": "prettier --write ."
+    "format": "prettier --check \"src/**/*.{ts,js,json}\"",
+    "format:write": "prettier --write \"src/**/*.{ts,js,json}\""
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
