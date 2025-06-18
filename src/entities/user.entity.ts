@@ -37,20 +37,16 @@ export class User {
   @Column({ unique: true, nullable: true })
   email: string;
 
-  @Field(() => String, { nullable: true })
-  @Column({ type: 'timestamp', nullable: true })
-  phone_verified_at: Date | null;
-
-  @Field(() => String, { nullable: true })
-  @Column({ type: 'timestamp', nullable: true })
-  email_verified_at: Date | null;
+  @Field(()=> String, { nullable: true })
+  @Column({ unique: true, nullable: true })
+  telegram_id: number;
 
   @Column()
   password_hash: string;
 
-  @Field(() => Role, { nullable: true })
-  @ManyToOne(() => Role, { eager: true, nullable: true })
-  role: Role | null;
+  @Field(() => Role)
+  @ManyToOne(() => Role, { eager: true})
+  role: Role;
 
   @BeforeInsert()
   @BeforeUpdate()
