@@ -1,67 +1,163 @@
-# Самый обычный и пустой проект, создан, чтобы потом не мучаться с созданием пользователей и регой токенов jwt, также есть проверка доступа по роли
+# Users Auth with Roles — NestJS
 
-## .env
+Полноценная система аутентификации и авторизации на NestJS с поддержкой ролей, прав и управления пользователями.
+
+## Возможности
+
+- JWT-аутентификация
+- Управление пользователями (регистрация, профиль, обновление, удаление)
+- Ролевой доступ (RBAC)
+- Гибкая система прав (permissions)
+- Защита маршрутов через Guard'ы
+- Документация Swagger
+- Поддержка Docker и PostgreSQL
+- Тесты (unit, e2e)
+
+---
+
+## Структура проекта
 
 ```
-# Основные настройки
-
-PORT=
-
-# База данных
-
-DB_HOST=
-DB_PORT=
-DB_USERNAME=
-DB_PASSWORD=
-DB_NAME=
-
-# JWT
-
-JWT_SECRET=
-```
-
-## PermissionGuard
-
-`PermissionGuard` — это кастомный guard в NestJS, который проверяет, есть ли у пользователя необходимые разрешения для доступа к определённому маршруту. Он использует метаданные, определённые с помощью декораторов, для выполнения проверки разрешений.
-
-### Основные возможности:
-
-- Проверяет разрешения пользователя на соответствие необходимым (все или хотя бы одно).
-- Получает данные пользователя и его роли из базы данных.
-- Выбрасывает исключение `ForbiddenException`, если доступ запрещён.
-
-### Использование:
-
-1. Определите необходимые разрешения с помощью кастомных декораторов (`PERMISSIONS_ALL_KEY` или `PERMISSIONS_ANY_KEY`).
-2. Примените `PermissionGuard` к маршруту или контроллеру.
-
-### Пример:
-
-```typescript
-@UseGuards(JwtAuthGuard, PermissionGuard)
-@PermissionsAll('user:write') // Нужны все разрешения перечисленные в декораторе
-@PermissionsAny('user:write') // Нужно хотя бы одно разрешение перечисленное в декораторе
-@Get('protected-route')
-async protectedRoute() {
-  return 'Этот маршрут защищён разрешениями';
-}
+src/
+├── app.module.ts
+├── main.ts
+├── auth/         # Аутентификация и JWT
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   ├── jwt.strategy.ts
+│   ├── jwt-auth.guard.ts
+│   └── interfaces/
+├── users/        # Пользователи
+│   ├── users.controller.ts
+│   ├── users.service.ts
+│   ├── password.service.ts
+│   ├── create-user.dto.ts
+│   ├── update-user.dto.ts
+│   └── interfaces/
+├── roles/        # Роли
+│   ├── roles.controller.ts
+│   ├── roles.service.ts
+│   └── interfaces/
+├── permissions/  # Права доступа
+│   ├── permissions.controller.ts
+│   ├── permissions.service.ts
+│   ├── permissions.guard.ts
+│   └── permissions.decorator.ts
+├── entities/     # TypeORM-сущности (User, Role, Permission)
+├── database/     # Сиды и настройки БД
+│   └── seeds/
+└── ...
 ```
 
 ---
 
-## JWT Декоратор
+## Быстрый старт
 
-JWT-декоратор извлекает объект `user` из полезной нагрузки JWT и делает его доступным в запросе.
+1. Клонируйте репозиторий и установите зависимости:
+   ```bash
+   git clone https://github.com/nkd89/userAuthWRoles.git
+   cd userAuthWRoles
+   npm install
+   ```
+2. Создайте файл `.env` в корне:
+   ```env
+   PORT=3000
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   DB_NAME=userswroles
+   JWT_SECRET=your_jwt_secret
+   S3_URL=your_url
+   S3_UPLOAD_TOKEN=your_bearer_token
+   ```
+3. Запустите PostgreSQL (можно через Docker):
+   ```bash
+   docker-compose up -d
+   ```
+4. Запустите приложение:
+   ```bash
+   npm run start:dev
+   # или production
+   npm run build && npm run start:prod
+   ```
 
-### Использование:
+---
 
-```typescript
-@(JwtAuthGuard) // не пускает без jwt токена
-@Get('profile')
-async getProfile(@Request() req) {
-  const userId = req.user.id; // достаем полезную нагрузку
-  return `ID пользователя: ${userId}`;
-}
-```
+## Основные модули и примеры
 
-Этот декоратор упрощает доступ к данным аутентифицированного пользователя в ваших контроллерах.
+### Аутентификация
+
+- POST `/auth/login` — вход по email/телефону и паролю
+- JWT-токен возвращается в ответе
+
+### Пользователи
+
+- POST `/users/register` — регистрация
+- GET `/users/me` — профиль текущего пользователя (JWT)
+- PUT `/users/me` — обновление профиля
+- DELETE `/users/me` — удаление пользователя
+
+### Роли
+
+- POST `/roles` — создать роль
+- GET `/roles` — список ролей
+- PUT `/roles/:id` — обновить роль
+- DELETE `/roles/:id` — удалить роль
+
+### Права (permissions)
+
+- Гибкая система прав, назначаемых ролям
+- Пример использования Guard:
+  ```typescript
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @PermissionsAll('users.update.self')
+  @Get('protected')
+  getProtected() { return 'Доступ разрешён'; }
+  ```
+
+---
+
+## Документация API
+
+Swagger доступен по адресу: [http://localhost:3000/docs](http://localhost:3000/docs)
+
+---
+
+## Тестирование
+
+- Unit-тесты: `npm run test`
+- E2E-тесты: `npm run test:e2e`
+- Покрытие: `npm run test:cov`
+
+---
+
+## Docker
+
+- Запуск PostgreSQL и pgAdmin:
+  ```bash
+  docker-compose up -d
+  ```
+- Остановка:
+  ```bash
+  docker-compose down
+  ```
+
+---
+
+## Seed (начальные данные)
+
+- В проекте есть сиды для создания базовых ролей и прав (`src/database/seeds/initial-seed.ts`).
+
+---
+
+## Контакты и поддержка
+
+- GitHub: https://github.com/nkd89/userAuthWRoles
+- Issues: https://github.com/nkd89/userAuthWRoles/issues
+
+---
+
+## Лицензия
+
+MIT

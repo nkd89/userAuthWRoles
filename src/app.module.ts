@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,10 +9,12 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { DataSource } from 'typeorm';
+import { initialSeed } from './database/seeds/initial-seed';
 
 @Module({
   imports: [
-     ConfigModule.forRoot({
+    ConfigModule.forRoot({
       isGlobal: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -42,4 +44,11 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+  constructor(private dataSource: DataSource) {}
+
+  async onApplicationBootstrap() {
+    // Run the initial seed
+    await initialSeed(this.dataSource);
+  }
+}

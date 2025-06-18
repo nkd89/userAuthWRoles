@@ -1,24 +1,47 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { User } from 'src/entities/user.entity';
-import { Role } from 'src/entities/role.entity';
+import { User } from '../entities/user.entity';
+import { Role } from '../entities/role.entity';
 import { CreateUserDto } from './create-user.dto';
-import * as FormData from 'form-data';
+import { IUserManagement } from './interfaces/user-management.interface';
+import { PasswordService } from './password.service';
 import axios from 'axios';
+import * as FormData from 'form-data';
+import { Blob } from 'buffer';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements IUserManagement {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Role) private roleRepo: Repository<Role>,
+    private readonly passwordService: PasswordService,
   ) {}
 
   async createUser(userDto: CreateUserDto): Promise<User> {
+    await this.validateUserDto(userDto);
+    
+    const user = this.userRepo.create({
+      ...userDto,
+      password_hash: await this.passwordService.hashPassword(userDto.password),
+    });
+
+    // If no role is specified, assign the default 'user' role
+    if (!user.role) {
+      const defaultRole = await this.roleRepo.findOne({ where: { name: 'user' } });
+      if (!defaultRole) {
+        throw new BadRequestException('Default user role not found. Please run database seeds.');
+      }
+      user.role = defaultRole;
+    }
+
+    return this.userRepo.save(user);
+  }
+
+  private async validateUserDto(userDto: CreateUserDto): Promise<void> {
     Object.keys(userDto).forEach((key) => {
       if (userDto[key] === undefined || userDto[key] === null || userDto[key] === '') {
-      delete userDto[key];
+        delete userDto[key];
       }
     });
 
@@ -45,13 +68,6 @@ export class UsersService {
     if (userDto.password.length < 6) {
       throw new BadRequestException('Password must be at least 6 characters long');
     }
-
-    const user = this.userRepo.create({
-      ...userDto,
-      password_hash: userDto.password,
-    });
-
-    return this.userRepo.save(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -123,20 +139,19 @@ export class UsersService {
     }
   
     if (!file || !file.buffer) {
-      throw new BadRequestException('Файл не получен');
+      throw new BadRequestException('File not received');
     }
   
     const form = new FormData();
-    form.append('file', file.buffer, {
-      filename: file.originalname,
-      contentType: file.mimetype,
-    });
+    const blob = new Blob([file.buffer], { type: file.mimetype });
+    form.append('file', blob, file.originalname);
   
     try {
-      const response = await axios.post(S3_URL, form, {
+      const response = await axios.post(S3_URL, form.getBuffer(), {
         headers: {
-          Authorization: `Bearer ${TOKEN}`,
           ...form.getHeaders(),
+          Authorization: `Bearer ${TOKEN}`,
+          'Content-Type': `multipart/form-data; boundary=${form.getBoundary()}`
         },
         responseType: 'text',
       });

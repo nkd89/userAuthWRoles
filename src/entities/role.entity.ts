@@ -14,6 +14,10 @@ export class Role {
   @Column({ unique: true, nullable: false })
   name: string;
 
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  description: string;
+
   @Field(() => [Permission])
   @ManyToMany(() => Permission, (permission) => permission.roles)
   @JoinTable()

@@ -3,9 +3,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Role } from "src/entities/role.entity";
 import { Permission } from "src/entities/permission.entity";
 import { Repository } from "typeorm";
+import { IRoleManagement, IPermissionManagement } from './interfaces/role-management.interface';
 
 @Injectable()
-export class RolesService {
+export class RolesService implements IRoleManagement, IPermissionManagement {
   constructor(
     @InjectRepository(Role) private roleRepo: Repository<Role>,
     @InjectRepository(Permission) private permissionRepo: Repository<Permission>

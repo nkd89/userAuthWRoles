@@ -1,10 +1,28 @@
 {
-  "name": "veloruchka",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "name": "users-auth-with-roles",
+  "version": "1.0.0",
+  "description": "A foundational project designed for forking, providing a base implementation for user management, role assignments, and permission handling.",
+  "author": "izvenyaisya",
+  "license": "MIT",
+  "keywords": [
+    "users",
+    "roles",
+    "permissions",
+    "authentication",
+    "authorization",
+    "base",
+    "template",
+    "boilerplate",
+    "forkable"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nkd89/userAuthWRoles.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nkd89/userAuthWRoles/issues"
+  },
+  "homepage": "https://github.com/nkd89/userAuthWRoles#readme",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -12,10 +30,9 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:cov": "jest --config jest.config.js --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
@@ -28,11 +45,12 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/typeorm": "^11.0.0",
-    "axios": "^1.9.0",
+    "@types/form-data": "^2.2.1",
+    "axios": "^1.10.0",
     "bcrypt": "^5.1.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
-    "form-data": "^4.0.2",
+    "form-data": "^4.0.3",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -81,7 +99,6 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
